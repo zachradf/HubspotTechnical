@@ -12,6 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "express-session": "^1.18.0"
+    "express-session": "^1.18.0",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "@types/validator": "^13.11.10"
   }
 }

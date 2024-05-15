@@ -94,10 +94,15 @@ app.get('/contacts', async (req, res) => {
   try {
       const response = await axios.get(
           'https://api.hubapi.com/crm/v3/objects/contacts',
-          { headers: { Authorization: `Bearer ${user.accessToken}` } }
+          {
+            headers: { Authorization: `Bearer ${user.accessToken}` },
+            params: {
+              limit: 100,
+            }
+         }
       );
-        // Map the response to your Contact schema structure
-    const newContacts = response.data.results.map(contact => ({
+
+      const newContacts = response.data.results.map(contact => ({
       archived: contact.archived,
       createdAt: contact.createdAt,
       id: contact.id,
