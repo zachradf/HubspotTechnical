@@ -1,5 +1,4 @@
 module.exports.ensureAuth = (req, res, next) => {
-  // console.log('req', req)
   if (req.isAuthenticated()) {
     return next();
   } else {

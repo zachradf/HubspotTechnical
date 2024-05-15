@@ -14,12 +14,15 @@ const App = () => {
   const fetchContacts = async (resetIndex = true) => {
     try {
       const response = await axios.get('/contacts');
-      console.log('response', response);
       setContacts(response.data.results);
       if (resetIndex === true) setCurrentContactIndex(0);
     } catch (err) {
-      console.error('Error fetching contacts:', err);
-      setError('Error fetching contacts');
+      if (isAuthenticated) {
+        console.error('Error fetching contacts:', err);
+        setError('Error fetching contacts');
+      } else {
+        setError('Login to Hubspot to see your contacts');
+      }
     }
   };
   useEffect(() => {
