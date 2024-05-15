@@ -96,12 +96,6 @@ app.get('/contacts', async (req, res) => {
           'https://api.hubapi.com/crm/v3/objects/contacts',
           { headers: { Authorization: `Bearer ${user.accessToken}` } }
       );
-      const getResponse = await axios.get('https://api.hubapi.com/crm/v3/properties/contacts',{
-        headers: {
-          Authorization: `Bearer ${user.accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      })
         // Map the response to your Contact schema structure
     const newContacts = response.data.results.map(contact => ({
       archived: contact.archived,
@@ -173,38 +167,6 @@ app.post('/contacts/create', async (req, res) => {
   }
 })
 
-app.post('/properties/create', async (req, res) => {
-  const { propertyName, propertyType, propertyValue, propertyFieldType } = req.body;
-  const user = await User.findById(req.session.userId);
-
-  if (!user) {
-    return res.status(404).send('User not found');
-  }
-
-  try {
-    const response = await axios.patch('https://api.hubapi.com/crm/v3/properties/contacts', {
-      name: propertyName,
-      label: propertyName,
-      type: propertyType,
-      value: propertyValue,
-      fieldType: propertyFieldType,
-      groupName: 'contactinformation',
-    }, {
-      headers: {
-        Authorization: `Bearer ${user.accessToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    console.log('Property created:', response.data);
-    res.send(response.data);
-  } catch (error) {
-    console.log('error', error)
-    console.error('Failed to create property:', error.response ? error.response.data : error.message);
-    res.status(500).send('Failed to create property');
-  }
-});
-
 app.delete('/contacts/:id', async (req, res) => {
   const user = await User.findById(req.session.userId);
   const contactId = req.params.id
@@ -229,3 +191,41 @@ app.delete('/contacts/:id', async (req, res) => {
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+//app.post('/properties/create', async (req, res) => {
+  //   const { propertyName, propertyType, propertyValue, propertyFieldType } = req.body;
+  //   const user = await User.findById(req.session.userId);
+  
+  //   if (!user) {
+  //     return res.status(404).send('User not found');
+  //   }
+  
+  //   try {
+  //     const getResponse = await axios.get('https://api.hubapi.com/crm/v3/properties/contacts',{
+  //       headers: {
+  //         Authorization: `Bearer ${user.accessToken}`,
+  //         'Content-Type': 'application/json'
+  //       }
+  //     })
+  //     const response = await axios.patch('https://api.hubapi.com/crm/v3/properties/contacts', {
+  //       name: propertyName,
+  //       label: propertyName,
+  //       type: propertyType,
+  //       value: propertyValue,
+  //       fieldType: propertyFieldType,
+  //       groupName: 'contactinformation',
+  //     }, {
+  //       headers: {
+  //         Authorization: `Bearer ${user.accessToken}`,
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+  
+  //     console.log('Property created:', response.data);
+  //     res.send(response.data);
+  //   } catch (error) {
+  //     console.log('error', error)
+  //     console.error('Failed to create property:', error.response ? error.response.data : error.message);
+  //     res.status(500).send('Failed to create property');
+  //   }
+  // });

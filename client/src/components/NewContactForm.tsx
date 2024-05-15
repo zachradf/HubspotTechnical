@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useState } from 'react';
+import './NewContactForm.css';
 
 interface NewContactFormProps {
   setIsNewContact: React.Dispatch<React.SetStateAction<boolean>>;

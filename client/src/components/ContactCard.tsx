@@ -16,12 +16,6 @@ const ContactCard: React.FC<ContactCardProps> = ({
 }) => {
   const [editMode, setEditMode] = useState<{ [key: string]: boolean }>({});
   const [editedContact, setEditedContact] = useState(contact.properties);
-  // const [newField, setNewField] = useState({
-  //   name: '',
-  //   type: 'string',
-  //   fieldType: 'text',
-  //   value: '', // New state to hold the value of the new field
-  // });
 
   useEffect(() => {
     setEditedContact({
@@ -47,14 +41,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
 
   const handleSave = async (field: string) => {
     await saveContact(contact.id, { [field]: editedContact[field] });
-    setEditedContact([
-      contact.properties.firstname,
-      contact.properties.lastname,
-      contact.properties.email,
-    ]);
-    handleEditToggle(field);
+    setEditMode({ ...editMode, [field]: false }); // Close edit mode after saving
   };
-
   const handleDelete = async (id: string) => {
     await axios.delete(`contacts/${id}`);
     refreshContacts();
@@ -63,6 +51,22 @@ const ContactCard: React.FC<ContactCardProps> = ({
   return (
     <div className='contact-card'>
       <h3>
+        <svg
+          onClick={() => handleDelete(contact.properties.hs_object_id)}
+          xmlns='http://www.w3.org/2000/svg'
+          width='24'
+          height='24'
+          fill='currentColor'
+          className='bi bi-trash delete-icon'
+          viewBox='0 0 16 16'
+          style={{ cursor: 'pointer', float: 'right', color: 'red' }}
+        >
+          <path d='M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2 0A.5.5 0 0 1 8 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5z' />
+          <path
+            fillRule='evenodd'
+            d='M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v1zm-11 1V4h10v9a1 1 0 0 0 1-1V4h-12zm2-2V2H4v1h1zm1 0V2h4v1H7zm5 0V2h-1v1h1zm.5-1h-9V2h9v1z'
+          />
+        </svg>
         {Object.entries(fieldLabels).map(([key, label]) =>
           editMode[key] ? (
             <div key={key}>
@@ -77,28 +81,10 @@ const ContactCard: React.FC<ContactCardProps> = ({
           ) : (
             <p key={key} onClick={() => handleEditToggle(key)}>
               {label}: {editedContact[key]}
+              <span className='edit-icon'>&#9998;</span>
             </p>
           )
         )}
-        <button
-          onClick={() => handleDelete(contact.properties.hs_object_id)}
-          style={{ marginLeft: '10px' }}
-        >
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            width='16'
-            height='16'
-            fill='currentColor'
-            className='bi bi-trash'
-            viewBox='0 0 16 16'
-          >
-            <path d='M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2 0A.5.5 0 0 1 8 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5z' />
-            <path
-              fillRule='evenodd'
-              d='M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v1zm-11 1V4h10v9a1 1 0 0 0 1-1V4h-12zm2-2V2H4v1h1zm1 0V2h4v1H7zm5 0V2h-1v1h1zm.5-1h-9V2h9v1z'
-            />
-          </svg>
-        </button>
       </h3>
       <p>ID: {contact.properties.hs_object_id}</p>
       <p>Created: {contact.properties.createdate}</p>
@@ -111,7 +97,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
 };
 
 export default ContactCard;
-//{
+
 /* <div>
           <input
             name='name'
