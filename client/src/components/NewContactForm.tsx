@@ -5,12 +5,18 @@ import './NewContactForm.css';
 interface NewContactFormProps {
   setIsNewContact: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
 const NewContactForm: React.FC<NewContactFormProps> = ({ setIsNewContact }) => {
   const [contactDetails, setContactDetails] = useState({
     firstname: '',
     lastname: '',
     email: '',
   });
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -19,14 +25,43 @@ const NewContactForm: React.FC<NewContactFormProps> = ({ setIsNewContact }) => {
       [name]: value,
     }));
   };
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Submitting new contact:', contactDetails);
-    const response = await axios.post('/contacts/create', {
-      properties: contactDetails,
-    });
 
-    setIsNewContact(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    // Check if all fields are empty
+    if (
+      !contactDetails.firstname &&
+      !contactDetails.lastname &&
+      !contactDetails.email
+    ) {
+      alert('Please fill in at least one field to create a new contact.');
+      e.preventDefault();
+      return;
+    }
+
+    if (contactDetails.email && !isValidEmail(contactDetails.email)) {
+      alert('Please provide a valid email');
+      e.preventDefault();
+      return;
+    }
+
+    console.log('Submitting new contact:', contactDetails);
+
+    try {
+      const response = await axios.post('/contacts/create', {
+        properties: contactDetails,
+      });
+      console.log('Contact creation response:', response.data);
+
+      // Clear the fields and close the form upon successful creation
+      setContactDetails({
+        firstname: '',
+        lastname: '',
+        email: '',
+      });
+      // setIsNewContact(false); // Close the form
+    } catch (error) {
+      console.error('Failed to create contact:', error);
+    }
   };
 
   return (
@@ -60,7 +95,7 @@ const NewContactForm: React.FC<NewContactFormProps> = ({ setIsNewContact }) => {
           value={contactDetails.email}
           onChange={handleChange}
         />
-      </div>{' '}
+      </div>
       <button type='submit'>Submit</button>
       <button type='button' onClick={() => setIsNewContact(false)}>
         Back

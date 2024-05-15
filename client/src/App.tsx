@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 import ContactCard from './components/ContactCard';
@@ -15,6 +15,7 @@ const App = () => {
     try {
       const response = await axios.get('/contacts');
       setContacts(response.data.results);
+      console.log('response', response);
       if (resetIndex === true) setCurrentContactIndex(0);
     } catch (err) {
       if (isAuthenticated) {
