@@ -50,7 +50,7 @@ const App = () => {
     try {
       const response = await axios.patch(`/contacts/edit/${id}`, properties);
       console.log('Contact updated', response.data);
-      // Update local state or trigger a re-fetch as necessary
+      // Update local state or trigger a re-fetch
       fetchContacts(false);
     } catch (error) {
       console.error('Failed to update contact', error);
@@ -61,7 +61,7 @@ const App = () => {
     window.location.href = 'http://localhost:5000/auth/hubspot';
   };
   const nextContact = () => {
-    setCurrentContactIndex(prev => (prev + 1) % contacts.length); // Wrap around to the start
+    setCurrentContactIndex(prev => (prev + 1) % contacts.length);
   };
 
   const previousContact = () => {

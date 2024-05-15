@@ -93,12 +93,12 @@ app.get('/contacts', async (req, res) => {
 
   try {
     let allContacts = [];
-    let after = null; // Start with no pagination token
+    let after = null; 
 
     do {
       const params = { limit: 100 };
       if (after) {
-        params.after = after; // Include the 'after' parameter if it exists
+        params.after = after; 
       }
 
       const response = await axios.get('https://api.hubapi.com/crm/v3/objects/contacts', {
@@ -114,16 +114,14 @@ app.get('/contacts', async (req, res) => {
         updatedAt: contact.updatedAt
       })));
 
-      // Update the 'after' token with the next page token, if it exists
       after = response.data.paging && response.data.paging.next ? response.data.paging.next.after : null;
 
-    } while (after); // Continue until there's no more 'after' token
+    } while (after); 
 
-    // Once all contacts are fetched, replace the old contacts with the new ones in the database
     user.contacts = allContacts;
     await user.save();
 
-    res.json(allContacts); // Send the aggregated contacts back as the response
+    res.json(allContacts); 
   } catch (error) {
     console.error('Error fetching contacts:', error.response ? error.response.data : error.message);
     res.status(500).send('Error fetching contacts');
@@ -138,7 +136,7 @@ app.get('/is-authenticated', (req, res) => {
 // Route to update a contact
 app.patch('/contacts/edit/:id', async (req, res) => {
   const contactId = req.params.id;
-  const properties = req.body; // Assuming the properties to update are sent in the body of the request
+  const properties = req.body; 
   const user = await User.findById(req.session.userId);
   console.log("Using access token:", user, req.session.userId, user.accessToken);
 
