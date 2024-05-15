@@ -79,47 +79,57 @@ app.get('/auth/hubspot/callback', async (req, res) => {
   }
 });
 
+
+
 app.get('/contacts', async (req, res) => {
-  // Check if user session exists
   if (!req.session.userId) {
-      return res.status(401).send('Not authenticated');
+    return res.status(401).send('Not authenticated');
   }
 
-  // Retrieve user from the database using the stored session userId
   const user = await User.findById(req.session.userId);
   if (!user) {
-      return res.status(404).send('User not found');
+    return res.status(404).send('User not found');
   }
 
   try {
-      const response = await axios.get(
-          'https://api.hubapi.com/crm/v3/objects/contacts',
-          {
-            headers: { Authorization: `Bearer ${user.accessToken}` },
-            params: {
-              limit: 100,
-            }
-         }
-      );
+    let allContacts = [];
+    let after = null; // Start with no pagination token
 
-      const newContacts = response.data.results.map(contact => ({
-      archived: contact.archived,
-      createdAt: contact.createdAt,
-      id: contact.id,
-      properties: contact.properties,
-      updatedAt: contact.updatedAt
-    }));
+    do {
+      const params = { limit: 100 };
+      if (after) {
+        params.after = after; // Include the 'after' parameter if it exists
+      }
 
-    // Replace old contacts with new ones
-    user.contacts = newContacts; 
+      const response = await axios.get('https://api.hubapi.com/crm/v3/objects/contacts', {
+        headers: { Authorization: `Bearer ${user.accessToken}` },
+        params: params
+      });
+
+      allContacts = allContacts.concat(response.data.results.map(contact => ({
+        archived: contact.archived,
+        createdAt: contact.createdAt,
+        id: contact.id,
+        properties: contact.properties,
+        updatedAt: contact.updatedAt
+      })));
+
+      // Update the 'after' token with the next page token, if it exists
+      after = response.data.paging && response.data.paging.next ? response.data.paging.next.after : null;
+
+    } while (after); // Continue until there's no more 'after' token
+
+    // Once all contacts are fetched, replace the old contacts with the new ones in the database
+    user.contacts = allContacts;
     await user.save();
 
-    res.json(response.data);
+    res.json(allContacts); // Send the aggregated contacts back as the response
   } catch (error) {
-      console.error('Error fetching contacts:', error.response ? error.response.data : error.message);
-      res.status(500).send('Error fetching contacts');
+    console.error('Error fetching contacts:', error.response ? error.response.data : error.message);
+    res.status(500).send('Error fetching contacts');
   }
 });
+
 
 app.get('/is-authenticated', (req, res) => {
   res.json({ isAuthenticated: req.session.userId ? true : false });

@@ -14,7 +14,7 @@ const App = () => {
   const fetchContacts = async (resetIndex = true) => {
     try {
       const response = await axios.get('/contacts');
-      setContacts(response.data.results);
+      setContacts(response.data);
       console.log('response', response);
       if (resetIndex === true) setCurrentContactIndex(0);
     } catch (err) {
