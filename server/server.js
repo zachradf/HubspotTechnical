@@ -1,8 +1,6 @@
 import axios from 'axios';
 import express from 'express';
 import mongoose from 'mongoose';
-import passport from 'passport';
-import { Strategy as HubSpotStrategy } from 'passport-hubspot';
 import bodyParser from 'body-parser';
 import { User } from './models/User.js'; // Ensure to include the file extension if necessary
 import cors from 'cors';
@@ -17,9 +15,6 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors())
 app.use(bodyParser.json());
-// app.use(session({ secret: 'secret', resave: false, saveUninitialized: true }));
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 // MongoDB Connection
 mongoose
@@ -30,36 +25,7 @@ mongoose
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
-// Passport Configuration
-// passport.use(
-//   new HubSpotStrategy(
-//     {
-//       clientID: process.env.HUBSPOT_CLIENT_ID,
-//       clientSecret: process.env.HUBSPOT_CLIENT_SECRET,
-//       callbackURL: process.env.HUBSPOT_CALLBACK_URL,
-//       passReqToCallback: true,
-//     },
-//     function (req, accessToken, refreshToken, profile, done) {
-//       User.findOneAndUpdate(
-//         { hubspotId: profile.id },
-//         { accessToken, refreshToken },
-//         { upsert: true, new: true },
-//         (err, user) => done(err, user)
-//       );
-//     }
-//   )
-// );
-
-// passport.serializeUser((user, done) => {
-//   done(null, user.id);
-// });
-
-// passport.deserializeUser((id, done) => {
-//   User.findById(id, (err, user) => done(err, user));
-// });
-
 // Routes
-// app.get('/auth/hubspot', passport.authenticate('hubspot'));
 app.use(session({
   secret: 'verySecretValue',  // Use a long, random string in production
   resave: false,
@@ -106,12 +72,6 @@ app.get('/auth/hubspot/callback', async (req, res) => {
           { accessToken: response.data.access_token, refreshToken: response.data.refresh_token },
           { upsert: true, new: true }
       );
-
-      // // Log user in
-      // req.login(user, err => {
-      //     if (err) { return res.status(500).send(err.message); }
-      //     return res.redirect('/failed-login');  // Redirect user after successful authentication
-      // });
       req.session.userId = user._id;
       res.redirect('http://localhost:3000/');
     } catch (error) {
@@ -133,12 +93,17 @@ app.get('/contacts', async (req, res) => {
   }
 
   try {
-      // Make the API call to HubSpot
       const response = await axios.get(
           'https://api.hubapi.com/crm/v3/objects/contacts',
           { headers: { Authorization: `Bearer ${user.accessToken}` } }
       );
-      res.json(response.data);
+      const getResponse = await axios.get('https://api.hubapi.com/crm/v3/properties/contacts',{
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      })
+    res.json(response.data);
   } catch (error) {
       console.error('Error fetching contacts:', error.response ? error.response.data : error.message);
       res.status(500).send('Error fetching contacts');
@@ -150,7 +115,7 @@ app.get('/is-authenticated', (req, res) => {
 });
 
 // Route to update a contact
-app.patch('/contacts/:id', async (req, res) => {
+app.patch('/contacts/edit/:id', async (req, res) => {
   const contactId = req.params.id;
   const properties = req.body; // Assuming the properties to update are sent in the body of the request
   const user = await User.findById(req.session.userId);
@@ -176,5 +141,80 @@ app.patch('/contacts/:id', async (req, res) => {
     res.status(500).send('Failed to update contact');
   }
 });
+
+app.post('/contacts/create', async (req, res) => {
+  const user = await User.findById(req.session.userId);
+  if (!user) {
+    return res.status(404).send('User not found');
+  }
+
+  try {
+    const response = await axios.post('https://api.hubapi.com/crm/v3/objects/contacts', req.body, {
+      headers: {
+        Authorization: `Bearer ${user.accessToken}`, // Replace with your actual access token
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Contact created:', response.data);
+  } catch (error) {
+    console.error('Failed to create contact:', error.response ? error.response.data : error.message);
+  }
+})
+
+app.post('/properties/create', async (req, res) => {
+  const { propertyName, propertyType, propertyValue, propertyFieldType } = req.body;
+  const user = await User.findById(req.session.userId);
+
+  if (!user) {
+    return res.status(404).send('User not found');
+  }
+
+  try {
+    const response = await axios.patch('https://api.hubapi.com/crm/v3/properties/contacts', {
+      name: propertyName,
+      label: propertyName,
+      type: propertyType,
+      value: propertyValue,
+      fieldType: propertyFieldType,
+      groupName: 'contactinformation',
+    }, {
+      headers: {
+        Authorization: `Bearer ${user.accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('Property created:', response.data);
+    res.send(response.data);
+  } catch (error) {
+    console.log('error', error)
+    console.error('Failed to create property:', error.response ? error.response.data : error.message);
+    res.status(500).send('Failed to create property');
+  }
+});
+
+app.delete('/contacts/:id', async (req, res) => {
+  const user = await User.findById(req.session.userId);
+  // console.log("Using access token:", user, req.session.userId, user.accessToken);
+  const contactId = req.params.id
+  if (!user) {
+      return res.status(404).send('User not found');
+  }
+  try {
+    const response = await axios.delete(`https://api.hubapi.com/crm/v3/objects/contacts/${contactId}`, {
+      headers: {
+        Authorization: `Bearer ${user.accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('Contact Deleted:', response);
+    res.send(response.data);
+  } catch (error) {
+    console.error('Failed to delete contact:', error.response ? error.response.data : error.message);
+    res.status(500).send('Failed to delete contact');
+  }
+});
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
