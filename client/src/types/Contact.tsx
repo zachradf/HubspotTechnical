@@ -3,14 +3,8 @@ interface Contact {
   createdAt: string;
   id: string;
   properties: {
-    createdate: string;
-    email: string;
-    firstname: string;
-    hs_object_id: string;
-    lastmodifieddate: string;
-    lastname: string;
+    [key: string]: any; // Allows any property name with any value
   };
   updatedAt: string;
 }
-
 export default Contact;
