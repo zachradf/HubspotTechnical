@@ -24,7 +24,7 @@ const NewContactForm: React.FC<NewContactFormProps> = ({ setIsNewContact }) => {
     const response = await axios.post('/contacts/create', {
       properties: contactDetails,
     });
-    // After submission:
+
     setIsNewContact(false);
   };
 

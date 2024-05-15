@@ -45,33 +45,6 @@ const ContactCard: React.FC<ContactCardProps> = ({
     setEditedContact(prev => ({ ...prev, [field]: value }));
   };
 
-  // const handleNewFieldChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  // ) => {
-  //   setNewField(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  // };
-
-  // const handleAddNewField = async () => {
-  //   if (!newField.name.trim()) return;
-  //   // Call your backend endpoint to add the new field and its value to the HubSpot schema
-  //   try {
-  //     const response = await axios.post('/properties/create', {
-  //       propertyName: newField.name,
-  //       propertyType: newField.type,
-  //       propertyFieldType: newField.fieldType,
-  //       propertyValue: newField.value, // Sending the value along with other property details
-  //     });
-  //     alert('New field added successfully!');
-  //     setNewField({ name: '', type: 'string', fieldType: 'text', value: '' }); // Reset new field input
-  //   } catch (error) {
-  //     console.error(
-  //       'Failed to add new field:',
-  //       error.response ? error.response.data : error.message
-  //     );
-  //     alert('Failed to add new field');
-  //   }
-  // };
-
   const handleSave = async (field: string) => {
     await saveContact(contact.id, { [field]: editedContact[field] });
     setEditedContact([
@@ -88,55 +61,6 @@ const ContactCard: React.FC<ContactCardProps> = ({
   };
 
   return (
-    // <div className='contact-card'>
-    //   <h3>
-    //     {Object.entries({
-    //       'firstname': contact.properties.firstname,
-    //       'lastname': contact.properties.lastname,
-    //       Email: contact.properties.email,
-    //     }).map(([key, value]) =>
-    //       editMode[key] ? (
-    //         <div key={key}>
-    //           <input
-    //             type='text'
-    //             value={value}
-    //             onChange={e => handleChange(key, e.target.value)}
-    //           />
-    //           <button onClick={() => handleSave(key)}>Save</button>
-    //         </div>
-    //     <div className='contact-card'>
-    //       <h3>
-    //         {Object.keys(editedContact).map(key =>
-    //           editMode[key] ? (
-    //             <div key={key}>
-    //               <input
-    //                 type='text'
-    //                 value={editedContact[key]}
-    //                 onChange={e => handleChange(key, e.target.value)}
-    //               />
-    //               <button onClick={() => handleSave(key)}>Save</button>
-    //             </div>
-    //           ) : (
-    //             // <p key={key} onClick={() => handleEditToggle(key)}>
-    //             //   {key}: {value}
-    //             // </p>
-    //             <p key={key} onClick={() => handleEditToggle(key)}>
-    //               {key}: {editedContact[key]}
-    //             </p>
-    //           )
-    //         )}
-    //       </h3>
-    // <p>ID: {contact.properties.hs_object_id}</p>
-    // <p>Created: {contact.properties.createdate}</p>
-    // <p>Last Modified: {contact.properties.lastmodifieddate}</p>
-    // <p>Archived: {contact.archived ? 'Yes' : 'No'}</p>
-    // <p>Created At: {contact.createdAt}</p>
-    // <p>Updated At: {contact.updatedAt}</p>
-    //     </div>
-    //   );
-    // };
-
-    // export default ContactCard;
     <div className='contact-card'>
       <h3>
         {Object.entries(fieldLabels).map(([key, label]) =>

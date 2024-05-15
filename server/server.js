@@ -2,21 +2,20 @@ import axios from 'axios';
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
-import { User } from './models/User.js'; // Ensure to include the file extension if necessary
 import cors from 'cors';
 import crypto from 'crypto'
 import session from 'express-session'
 import dotenv from 'dotenv';
 dotenv.config();
+import { User } from './models/User.js';
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors())
 app.use(bodyParser.json());
 
-// MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -27,15 +26,15 @@ mongoose
 
 // Routes
 app.use(session({
-  secret: 'verySecretValue',  // Use a long, random string in production
+  secret: 'verySecretValue', 
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }  // Set secure to true if using HTTPS
+  cookie: { secure: false }  
 }));
 
 app.get('/auth/hubspot', (req, res) => {
   const state = crypto.randomBytes(16).toString('hex');  // Generate a secure random state
-  req.session.oauthState = state;  // Store state in session
+  req.session.oauthState = state;  
 
   const hubSpotAuthUrl = `https://app.hubspot.com/oauth/authorize?client_id=${encodeURIComponent(process.env.HUBSPOT_CLIENT_ID)}&optional_scope=${encodeURIComponent(process.env.SCOPES)}&scope=${encodeURIComponent('oauth')}&redirect_uri=${encodeURIComponent('http://localhost:5000/auth/hubspot/callback')}&state=${encodeURIComponent(state)}`;
   res.redirect(hubSpotAuthUrl);
@@ -103,6 +102,19 @@ app.get('/contacts', async (req, res) => {
           'Content-Type': 'application/json'
         }
       })
+        // Map the response to your Contact schema structure
+    const newContacts = response.data.results.map(contact => ({
+      archived: contact.archived,
+      createdAt: contact.createdAt,
+      id: contact.id,
+      properties: contact.properties,
+      updatedAt: contact.updatedAt
+    }));
+
+    // Replace old contacts with new ones
+    user.contacts = newContacts; 
+    await user.save();
+
     res.json(response.data);
   } catch (error) {
       console.error('Error fetching contacts:', error.response ? error.response.data : error.message);
@@ -195,7 +207,6 @@ app.post('/properties/create', async (req, res) => {
 
 app.delete('/contacts/:id', async (req, res) => {
   const user = await User.findById(req.session.userId);
-  // console.log("Using access token:", user, req.session.userId, user.accessToken);
   const contactId = req.params.id
   if (!user) {
       return res.status(404).send('User not found');

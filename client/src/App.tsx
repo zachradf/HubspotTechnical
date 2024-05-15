@@ -68,7 +68,7 @@ const App = () => {
   return (
     <div className='App'>
       <header className='App-header'>
-        <h1>Contact Sync Dashboard</h1>
+        <h1>Hubspot Roledex</h1>
         {!isAuthenticated && (
           <button onClick={loginWithHubSpot}>Login with HubSpot</button>
         )}
