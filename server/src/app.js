@@ -5,6 +5,7 @@ import session from 'express-session';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes.js';
+import { isAuthenticated } from './middleware/isAuthenticated.js';
 import contactRoutes from './routes/contactRoutes.js';
 
 dotenv.config();
@@ -26,6 +27,9 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
+app.get('/is-authenticated', isAuthenticated, (req, res) => {
+  res.json({ isAuthenticated: true });
+});
 app.use(authRoutes);
 app.use(contactRoutes);
 

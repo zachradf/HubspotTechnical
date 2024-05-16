@@ -50,6 +50,7 @@ export const createContact = async (req, res) => {
           'Content-Type': 'application/json'
         }
       });
+      res.send(response.data);
       console.log('Contact created:', response.data);
     } catch (error) {
       console.error('Failed to create contact:', error.response ? error.response.data : error.message);
