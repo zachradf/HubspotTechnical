@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { User } from '../../models/User';
+import { User } from '../models/User.js';
 
 export const getContacts = async (req, res) => {
 // Retrieve user from the database using the stored session userId

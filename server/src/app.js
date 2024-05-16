@@ -4,8 +4,8 @@ import cors from 'cors';
 import session from 'express-session';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import authRoutes from './routes/authRoutes';
-import contactRoutes from './routes/contactRoutes';
+import authRoutes from './routes/authRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
 
 dotenv.config();
 const app = express();
