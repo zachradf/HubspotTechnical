@@ -27,7 +27,6 @@ const NewContactForm: React.FC<NewContactFormProps> = ({ setIsNewContact }) => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // Check if all fields are empty
     if (
       !contactDetails.firstname &&
       !contactDetails.lastname &&
@@ -51,14 +50,6 @@ const NewContactForm: React.FC<NewContactFormProps> = ({ setIsNewContact }) => {
         properties: contactDetails,
       });
       console.log('Contact creation response:', response.data);
-
-      // Clear the fields and close the form upon successful creation
-      setContactDetails({
-        firstname: '',
-        lastname: '',
-        email: '',
-      });
-      // setIsNewContact(false); // Close the form
     } catch (error) {
       console.error('Failed to create contact:', error);
     }

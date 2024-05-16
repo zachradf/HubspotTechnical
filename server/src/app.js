@@ -13,7 +13,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(session({
-  secret: 'verySecretValue', 
+  //secret should be in .env but will leave for ease of use
+  secret: 'iUi7yvXPijprZSEPz1kFNWGEnQzHEm', 
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false }  
